@@ -119,6 +119,7 @@
 	      }
 	
 	      if (asteroid1.isCollidedWith(asteroid2)) {
+	        asteroid1.collideWith(asteroid2);
 	        console.log("COLLIDED");
 	      }
 	    });
@@ -128,7 +129,12 @@
 	Game.prototype.step = function () {
 	  this.moveObjects();
 	  this.checkCollosions();
-	}
+	};
+	
+	Game.prototype.remove = function (asteroid) {
+	  var idx = this.asteroids.indexOf(asteroid);
+	  this.asteroids.splice(idx,1);
+	};
 	
 	module.exports = Game;
 
@@ -184,6 +190,11 @@
 	    Math.pow(this.pos[0]-otherObject.pos[0],2) + Math.pow(this.pos[1]-otherObject.pos[1],2)
 	  );
 	  return distance < (this.radius + otherObject.radius);
+	};
+	
+	MovingObject.prototype.collideWith = function (otherObject) {
+	  this.game.remove(otherObject);
+	  this.game.remove(this);
 	};
 	
 	module.exports = MovingObject;

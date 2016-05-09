@@ -56,6 +56,7 @@ Game.prototype.checkCollosions = function () {
       }
 
       if (asteroid1.isCollidedWith(asteroid2)) {
+        asteroid1.collideWith(asteroid2);
         console.log("COLLIDED");
       }
     });
@@ -65,6 +66,11 @@ Game.prototype.checkCollosions = function () {
 Game.prototype.step = function () {
   this.moveObjects();
   this.checkCollosions();
-}
+};
+
+Game.prototype.remove = function (asteroid) {
+  var idx = this.asteroids.indexOf(asteroid);
+  this.asteroids.splice(idx,1);
+};
 
 module.exports = Game;
