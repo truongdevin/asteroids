@@ -1,16 +1,25 @@
 var Game = require('./game.js');
 
-function GameView() {}
+var GameView = function (game, ctx) {
+  this.ctx = ctx;
+  this.game = game;
+  // this.ship = this.game.addShip();
+};
 
 GameView.prototype.start = function (canvasEl) {
-    // get a 2d canvas drawing context. The canvas API lets us call
-    // a `getContext` method on a canvas DOM element.
-    var ctx = canvasEl.getContext("2d");
+    // var ctx = canvasEl.getContext("2d");
+    // var game = new Game();
 
-    var game = new Game();
+    // var refresh = function() {
+    //   game.moveObjects();
+    //   game.draw(ctx);
+    // };
+    var self = this;
     var refresh = function() {
-      game.moveObjects();
-      game.draw(ctx);
+      // self.game.moveObjects();
+      self.game.step();
+      // self.game.checkCollosions();
+      self.game.draw(self.ctx);
     };
 
     setInterval(refresh,20);
@@ -18,6 +27,3 @@ GameView.prototype.start = function (canvasEl) {
 
 
 module.exports = GameView;
-
-window.Game = Game;
-// window.movingObject = movingObject;

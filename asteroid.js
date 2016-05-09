@@ -1,9 +1,8 @@
-// Do we need to require all this stuff??
-var MovingObject = require("./movingObject.js");
-var Util = require("./util.js");
+var MovingObject = require("./movingObject");
+var Util = require("./util");
 
-function Asteroid(hash) {
-  hash.color = hash.color || "#008000";
+var Asteroid = function (hash) {
+  hash.color = hash.color || "grey";
   hash.radius = hash.radius || 10;
   hash.vel = hash.vel || Util.randomVec(5);
   MovingObject.call(this, hash);

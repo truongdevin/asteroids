@@ -46,19 +46,15 @@
 
 	var Game = __webpack_require__(1);
 	var GameView = __webpack_require__(5);
-	var M = __webpack_require__(3);
+	var MovingObject = __webpack_require__(3);
 	
 	var canvasEl = document.getElementById("game-canvas");
-	canvasEl.height = 800;
-	canvasEl.width = 800;
+	canvasEl.width = Game.DIM_X;
+	canvasEl.height = Game.DIM_Y;
 	
-	var newGame = new GameView();
-	newGame.start(canvasEl);
-	
-	window.game = Game;
-	window.gameview = GameView;
-	window.m = M;
-	window.n = newGame;
+	var ctx = canvasEl.getContext("2d");
+	var game = new Game();
+	new GameView(game, ctx).start();
 
 
 /***/ },
@@ -67,23 +63,27 @@
 
 	var Asteroid = __webpack_require__(2);
 	
-	function Game() {
-	  this.DIM_X = 800;
-	  this.DIM_Y = 800;
-	  this.NUM_ASTEROIDS = 4;
+	var Game = function () {
 	  this.asteroids = [];
 	  this.addAsteroids();
 	}
 	
+	Game.BG_COLOR="black";
+	Game.DIM_X = 1000;
+	Game.DIM_Y = 600;
+	Game.NUM_ASTEROIDS = 4;
+	
 	Game.prototype.addAsteroids = function() {
-	  for (var i = 0; i < this.NUM_ASTEROIDS; i++) {
+	  for (var i = 0; i < Game.NUM_ASTEROIDS; i++) {
 	    var a = new Asteroid({pos: this.randomPosition(), game: this});
 	    this.asteroids.push(a);
 	  }
 	};
 	
 	Game.prototype.draw = function (ctx) {
-	  ctx.clearRect(0, 0, this.DIM_X, this.DIM_Y);
+	  ctx.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
+	  ctx.fillStyle = Game.BG_COLOR;
+	  ctx.fillRect(0,0,Game.DIM_X, Game.DIM_Y);
 	
 	  this.asteroids.forEach(function(asteroid) {
 	    asteroid.draw(ctx);
@@ -98,16 +98,37 @@
 	};
 	
 	Game.prototype.randomPosition = function() {
-	  var x = this.DIM_X * Math.random();
-	  var y = this.DIM_Y * Math.random();
+	  var x = Game.DIM_X * Math.random();
+	  var y = Game.DIM_Y * Math.random();
 	  return [x, y];
 	};
 	
 	Game.prototype.wrap = function (pos) {
-	  pos[0] = pos[0] % 800;
-	  pos[1] = pos[1] % 800;
+	  pos[0] = pos[0] > 0 ? pos[0] % Game.DIM_X : Game.DIM_X
+	  pos[1] = pos[1] > 0 ? pos[1] % Game.DIM_Y : Game.DIM_Y
+	
 	  return [pos[0], pos[1]];
 	};
+	
+	Game.prototype.checkCollosions = function () {
+	  var self = this;
+	  this.asteroids.forEach(function(asteroid1) {
+	    self.asteroids.forEach(function(asteroid2) {
+	      if (asteroid1 === asteroid2) {
+	        return;
+	      }
+	
+	      if (asteroid1.isCollidedWith(asteroid2)) {
+	        console.log("COLLIDED");
+	      }
+	    });
+	  });
+	};
+	
+	Game.prototype.step = function () {
+	  this.moveObjects();
+	  this.checkCollosions();
+	}
 	
 	module.exports = Game;
 
@@ -116,12 +137,11 @@
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// Do we need to require all this stuff??
 	var MovingObject = __webpack_require__(3);
 	var Util = __webpack_require__(4);
 	
-	function Asteroid(hash) {
-	  hash.color = hash.color || "#008000";
+	var Asteroid = function (hash) {
+	  hash.color = hash.color || "grey";
 	  hash.radius = hash.radius || 10;
 	  hash.vel = hash.vel || Util.randomVec(5);
 	  MovingObject.call(this, hash);
@@ -137,7 +157,7 @@
 /***/ function(module, exports) {
 
 	
-	function MovingObject(hash) {
+	var MovingObject = function (hash) {
 	  this.pos = hash['pos'];
 	  this.vel = hash['vel'];
 	  this.radius = hash['radius'];
@@ -149,14 +169,7 @@
 	  ctx.fillStyle = this.color;
 	  ctx.beginPath();
 	
-	  ctx.arc(
-	    this.pos[0],
-	    this.pos[1],
-	    this.radius,
-	    0,
-	    2 * Math.PI,
-	    false
-	  );
+	  ctx.arc(this.pos[0], this.pos[1], this.radius, 0, 2 * Math.PI, false);
 	  ctx.fill();
 	};
 	
@@ -166,6 +179,13 @@
 	  this.game.wrap(this.pos);
 	};
 	
+	MovingObject.prototype.isCollidedWith = function (otherObject) {
+	  var distance = Math.sqrt(
+	    Math.pow(this.pos[0]-otherObject.pos[0],2) + Math.pow(this.pos[1]-otherObject.pos[1],2)
+	  );
+	  return distance < (this.radius + otherObject.radius);
+	};
+	
 	module.exports = MovingObject;
 
 
@@ -173,25 +193,23 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	// function Util() {}
-	var util = {};
-	// Rather than adding a constructor, you can put helper methods in a regular old object and export that instead.
+	module.exports = {
+	  inherits: function (ChildClass, ParentClass) {
+	    function Surrogate() {}
+	    Surrogate.prototype = ParentClass.prototype;
+	    ChildClass.prototype = new Surrogate;
+	    ChildClass.prototype.constructor = ChildClass;
+	  },
 	
-	util.inherits = function (ChildClass, ParentClass) {
-	  function Surrogate() {}
-	  Surrogate.prototype = ParentClass.prototype;
-	  ChildClass.prototype = new Surrogate;
-	  ChildClass.prototype.constructor = ChildClass;
+	  randomVec: function (length) {
+	    var deg = 2*Math.PI*Math.random();
+	    var plusOrMinusX = Math.random() < 0.5 ? -1 : 1;
+	    var plusOrMinusY = Math.random() < 0.5 ? -1 : 1;
+	    var x = Math.random()*length * plusOrMinusX;
+	    var y = Math.sqrt(length*length - x*x) * plusOrMinusY;
+	    return [x,y];
+	  }
 	};
-	
-	util.randomVec = function (length) {
-	  var x = Math.random()*length;
-	  var y = Math.sqrt(length*length - x*x);
-	  return [x,y];
-	};
-	
-	
-	module.exports = util;
 
 
 /***/ },
@@ -200,17 +218,26 @@
 
 	var Game = __webpack_require__(1);
 	
-	function GameView() {}
+	var GameView = function (game, ctx) {
+	  this.ctx = ctx;
+	  this.game = game;
+	  // this.ship = this.game.addShip();
+	};
 	
 	GameView.prototype.start = function (canvasEl) {
-	    // get a 2d canvas drawing context. The canvas API lets us call
-	    // a `getContext` method on a canvas DOM element.
-	    var ctx = canvasEl.getContext("2d");
+	    // var ctx = canvasEl.getContext("2d");
+	    // var game = new Game();
 	
-	    var game = new Game();
+	    // var refresh = function() {
+	    //   game.moveObjects();
+	    //   game.draw(ctx);
+	    // };
+	    var self = this;
 	    var refresh = function() {
-	      game.moveObjects();
-	      game.draw(ctx);
+	      // self.game.moveObjects();
+	      self.game.step();
+	      // self.game.checkCollosions();
+	      self.game.draw(self.ctx);
 	    };
 	
 	    setInterval(refresh,20);
@@ -218,9 +245,6 @@
 	
 	
 	module.exports = GameView;
-	
-	window.Game = Game;
-	// window.movingObject = movingObject;
 
 
 /***/ }
