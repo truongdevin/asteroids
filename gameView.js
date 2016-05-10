@@ -26,6 +26,8 @@ GameView.prototype.bindKeyHandlers = function () {
   key('a', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([-1,0]) : ""});
   key('s', function() {Math.abs(ship.vel[1]) < 10 ? ship.power([0,1]) : ""});
   key('d', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([1,0]) : ""});
+
+  key('space', function() {ship.fireBullet()});
 };
 
 

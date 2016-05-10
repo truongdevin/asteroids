@@ -1,9 +1,11 @@
 var Asteroid = require("./asteroid.js");
 var Ship = require("./ship");
+var Bullet = require("./bullet");
 
 var Game = function () {
   this.asteroids = [];
   this.ships = [];
+  this.bullets = [];
 
   // this.addShip();
   this.addAsteroids();
@@ -30,8 +32,12 @@ Game.prototype.addShip = function() {
   return ship;
 };
 
+Game.prototype.addBullet = function (bullet) {
+  this.bullets.push(bullet);
+}
+
 Game.prototype.allObjects = function () {
-  return this.asteroids.concat(this.ships);
+  return this.asteroids.concat(this.ships, this.bullets);
 };
 
 Game.prototype.draw = function (ctx) {
@@ -75,7 +81,7 @@ Game.prototype.checkCollosions = function () {
 
       if (object1.isCollidedWith(object2)) {
         object1.collideWith(object2);
-        console.log("COLLIDED");
+        // console.log("COLLIDED");
       }
     });
   });
@@ -86,9 +92,15 @@ Game.prototype.step = function () {
   this.checkCollosions();
 };
 
-Game.prototype.remove = function (asteroid) {
-  var idx = this.asteroids.indexOf(asteroid);
-  this.asteroids.splice(idx,1);
+Game.prototype.remove = function (object) {
+  if (object instanceof Bullet) {
+   this.bullets.splice(this.bullets.indexOf(object), 1);
+ } else if (object instanceof Asteroid) {
+    var idx = this.asteroids.indexOf(object);
+    this.asteroids.splice(idx,1);
+ } else if (object instanceof Ship) {
+  //  this.ships.splice(this.ships.indexOf(object), 1);
+ } 
 };
 
 module.exports = Game;

@@ -63,10 +63,12 @@
 
 	var Asteroid = __webpack_require__(2);
 	var Ship = __webpack_require__(6);
+	var Bullet = __webpack_require__(7);
 	
 	var Game = function () {
 	  this.asteroids = [];
 	  this.ships = [];
+	  this.bullets = [];
 	
 	  // this.addShip();
 	  this.addAsteroids();
@@ -93,8 +95,12 @@
 	  return ship;
 	};
 	
+	Game.prototype.addBullet = function (bullet) {
+	  this.bullets.push(bullet);
+	}
+	
 	Game.prototype.allObjects = function () {
-	  return this.asteroids.concat(this.ships);
+	  return this.asteroids.concat(this.ships, this.bullets);
 	};
 	
 	Game.prototype.draw = function (ctx) {
@@ -138,7 +144,7 @@
 	
 	      if (object1.isCollidedWith(object2)) {
 	        object1.collideWith(object2);
-	        console.log("COLLIDED");
+	        // console.log("COLLIDED");
 	      }
 	    });
 	  });
@@ -149,9 +155,15 @@
 	  this.checkCollosions();
 	};
 	
-	Game.prototype.remove = function (asteroid) {
-	  var idx = this.asteroids.indexOf(asteroid);
-	  this.asteroids.splice(idx,1);
+	Game.prototype.remove = function (object) {
+	  if (object instanceof Bullet) {
+	   this.bullets.splice(this.bullets.indexOf(object), 1);
+	 } else if (object instanceof Asteroid) {
+	    var idx = this.asteroids.indexOf(object);
+	    this.asteroids.splice(idx,1);
+	 } else if (object instanceof Ship) {
+	  //  this.ships.splice(this.ships.indexOf(object), 1);
+	 } 
 	};
 	
 	module.exports = Game;
@@ -170,8 +182,8 @@
 	  hash.vel = hash.vel || Util.randomVec(5);
 	  MovingObject.call(this, hash);
 	}
-	
 	Util.inherits(Asteroid, MovingObject);
+	Asteroid.prototype.type = "Asteroid";
 	
 	module.exports = Asteroid;
 
@@ -211,7 +223,11 @@
 	};
 	
 	MovingObject.prototype.collideWith = function (otherObject) {
-	  this.game.remove(otherObject);
+	  // this.game.remove(otherObject);
+	  // this.game.remove(this);
+	};
+	
+	MovingObject.prototype.remove = function () {
 	  this.game.remove(this);
 	};
 	
@@ -228,6 +244,26 @@
 	    Surrogate.prototype = ParentClass.prototype;
 	    ChildClass.prototype = new Surrogate;
 	    ChildClass.prototype.constructor = ChildClass;
+	  },
+	
+	  // Normalize the length of the vector to 1, maintaining direction.
+	  dir: function (vec) {
+	    var norm = this.norm(vec);
+	    return this.scale(vec, 1 / norm);
+	  },
+	  // Find distance between two points.
+	  dist: function (pos1, pos2) {
+	    return Math.sqrt(
+	      Math.pow(pos1[0] - pos2[0], 2) + Math.pow(pos1[1] - pos2[1], 2)
+	    );
+	  },
+	  // Find the length of the vector.
+	  norm: function (vec) {
+	    return this.dist([0, 0], vec);
+	  },
+	
+	  scale: function (vec, m) {
+	    return [vec[0] * m, vec[1] * m];
 	  },
 	
 	  randomVec: function (length) {
@@ -273,6 +309,8 @@
 	  key('a', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([-1,0]) : ""});
 	  key('s', function() {Math.abs(ship.vel[1]) < 10 ? ship.power([0,1]) : ""});
 	  key('d', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([1,0]) : ""});
+	
+	  key('space', function() {ship.fireBullet()});
 	};
 	
 	
@@ -285,6 +323,7 @@
 
 	var MovingObject = __webpack_require__(3);
 	var Util = __webpack_require__(4);
+	var Bullet = __webpack_require__(7);
 	
 	var Ship = function (hash) {
 	  hash.color = hash.color || "red"; // red , crimson, aqua
@@ -292,6 +331,9 @@
 	  hash.vel = [0,0];
 	  MovingObject.call(this, hash);
 	};
+	
+	Ship.prototype.type = "Ship";
+	
 	Util.inherits(Ship, MovingObject);
 	
 	Ship.prototype.power = function (impulse) {
@@ -307,8 +349,56 @@
 	  this.game.wrap(this.pos);
 	};
 	
+	Ship.prototype.fireBullet = function () {
+	  var bulletVel = Util.scale(
+	    Util.dir(this.vel),
+	    15
+	  );
+	  var bullet = new Bullet({
+	    pos: this.pos.slice(),
+	    vel: bulletVel,
+	    game: this.game
+	  });
+	  this.game.addBullet(bullet);
+	};
+	
 	
 	module.exports = Ship;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var MovingObject = __webpack_require__(3);
+	var Util = __webpack_require__(4);
+	var Ship = __webpack_require__(6);
+	
+	var Bullet = function (hash) {
+	  hash.color = hash.color || "red"; // red , crimson, aqua
+	  hash.radius = 5;
+	  // hash.vel = [0,0];
+	  MovingObject.call(this, hash);
+	};
+	
+	Bullet.prototype.type = "Bullet";
+	
+	Util.inherits(Bullet, MovingObject);
+	
+	Bullet.prototype.move = function() {
+	  this.pos[0] += this.vel[0];
+	  this.pos[1] += this.vel[1];
+	};
+	
+	Bullet.prototype.collideWith = function (object) {
+	  if (object.type === "Asteroid") {
+	    object.remove();
+	    this.remove();
+	  }
+	};
+	
+	
+	module.exports = Bullet;
 
 
 /***/ }
