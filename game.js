@@ -5,7 +5,7 @@ var Game = function () {
   this.asteroids = [];
   this.ships = [];
 
-  this.addShip();
+  // this.addShip();
   this.addAsteroids();
 }
 
@@ -27,6 +27,7 @@ Game.prototype.addShip = function() {
     game: this
   });
   this.ships.push(ship);
+  return ship;
 };
 
 Game.prototype.allObjects = function () {

@@ -68,7 +68,7 @@
 	  this.asteroids = [];
 	  this.ships = [];
 	
-	  this.addShip();
+	  // this.addShip();
 	  this.addAsteroids();
 	}
 	
@@ -90,6 +90,7 @@
 	    game: this
 	  });
 	  this.ships.push(ship);
+	  return ship;
 	};
 	
 	Game.prototype.allObjects = function () {
@@ -268,7 +269,7 @@
 	var GameView = function (game, ctx) {
 	  this.ctx = ctx;
 	  this.game = game;
-	  // this.ship = this.game.addShip();
+	  this.ship = this.game.addShip();
 	};
 	
 	GameView.prototype.start = function (canvasEl) {
@@ -279,6 +280,7 @@
 	    //   game.moveObjects();
 	    //   game.draw(ctx);
 	    // };
+	    this.bindKeyHandlers();
 	    var self = this;
 	    var refresh = function() {
 	      // self.game.moveObjects();
@@ -291,8 +293,11 @@
 	};
 	
 	GameView.prototype.bindKeyHandlers = function () {
-	
-	
+	  var ship = this.ship;
+	  key('w', function() {ship.power([0,-1])});
+	  key('a', function() {ship.power([-1,0])});
+	  key('s', function() {ship.power([0,1])});
+	  key('d', function() {ship.power([1,0])});
 	};
 	
 	
@@ -311,14 +316,22 @@
 	  hash.radius = hash.radius || 15;
 	  hash.vel = [0,0];
 	  MovingObject.call(this, hash);
-	}
+	};
+	Util.inherits(Ship, MovingObject);
 	
 	Ship.prototype.power = function (impulse) {
 	  this.vel[0] += impulse[0];
 	  this.vel[1] += impulse[1];
-	}
+	};
 	
-	Util.inherits(Ship, MovingObject);
+	Ship.prototype.move = function() {
+	  this.vel[0]*=0.99;
+	  this.vel[1]*=0.99;
+	  this.pos[0] += this.vel[0];
+	  this.pos[1] += this.vel[1];
+	  this.game.wrap(this.pos);
+	};
+	
 	
 	module.exports = Ship;
 
