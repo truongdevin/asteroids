@@ -62,9 +62,13 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Asteroid = __webpack_require__(2);
+	var Ship = __webpack_require__(6);
 	
 	var Game = function () {
 	  this.asteroids = [];
+	  this.ships = [];
+	
+	  this.addShip();
 	  this.addAsteroids();
 	}
 	
@@ -80,19 +84,38 @@
 	  }
 	};
 	
+	Game.prototype.addShip = function() {
+	  var ship = new Ship({
+	    pos: this.randomPosition(),
+	    game: this
+	  });
+	  this.ships.push(ship);
+	};
+	
+	Game.prototype.allObjects = function () {
+	  return this.asteroids.concat(this.ships);
+	};
+	
 	Game.prototype.draw = function (ctx) {
 	  ctx.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
 	  ctx.fillStyle = Game.BG_COLOR;
 	  ctx.fillRect(0,0,Game.DIM_X, Game.DIM_Y);
 	
-	  this.asteroids.forEach(function(asteroid) {
-	    asteroid.draw(ctx);
+	  // this.asteroids.forEach(function(asteroid) {
+	  //   asteroid.draw(ctx);
+	  // });
+	
+	  this.allObjects().forEach(function(object) {
+	    object.draw(ctx);
 	  });
 	};
 	
 	Game.prototype.moveObjects = function () {
-	  this.asteroids.forEach(function(asteroid) {
-	    asteroid.move();
+	  // this.asteroids.forEach(function(asteroid) {
+	  //   asteroid.move();
+	  // });
+	  this.allObjects().forEach(function(object) {
+	    object.move();
 	  });
 	
 	};
@@ -112,14 +135,27 @@
 	
 	Game.prototype.checkCollosions = function () {
 	  var self = this;
-	  this.asteroids.forEach(function(asteroid1) {
-	    self.asteroids.forEach(function(asteroid2) {
-	      if (asteroid1 === asteroid2) {
+	  // this.asteroids.forEach(function(asteroid1) {
+	  //   self.asteroids.forEach(function(asteroid2) {
+	  //     if (asteroid1 === asteroid2) {
+	  //       return;
+	  //     }
+	  //
+	  //     if (asteroid1.isCollidedWith(asteroid2)) {
+	  //       asteroid1.collideWith(asteroid2);
+	  //       console.log("COLLIDED");
+	  //     }
+	  //   });
+	  // });
+	  //
+	  this.allObjects().forEach(function(object1) {
+	    self.allObjects().forEach(function(object2) {
+	      if (object1 === object2) {
 	        return;
 	      }
 	
-	      if (asteroid1.isCollidedWith(asteroid2)) {
-	        asteroid1.collideWith(asteroid2);
+	      if (object1.isCollidedWith(object2)) {
+	        object1.collideWith(object2);
 	        console.log("COLLIDED");
 	      }
 	    });
@@ -147,7 +183,7 @@
 	var Util = __webpack_require__(4);
 	
 	var Asteroid = function (hash) {
-	  hash.color = hash.color || "grey";
+	  hash.color = hash.color || "white"; // red , crimson, aqua
 	  hash.radius = hash.radius || 10;
 	  hash.vel = hash.vel || Util.randomVec(5);
 	  MovingObject.call(this, hash);
@@ -254,8 +290,37 @@
 	    setInterval(refresh,20);
 	};
 	
+	GameView.prototype.bindKeyHandlers = function () {
+	
+	
+	};
+	
 	
 	module.exports = GameView;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var MovingObject = __webpack_require__(3);
+	var Util = __webpack_require__(4);
+	
+	var Ship = function (hash) {
+	  hash.color = hash.color || "red"; // red , crimson, aqua
+	  hash.radius = hash.radius || 15;
+	  hash.vel = [0,0];
+	  MovingObject.call(this, hash);
+	}
+	
+	Ship.prototype.power = function (impulse) {
+	  this.vel[0] += impulse[0];
+	  this.vel[1] += impulse[1];
+	}
+	
+	Util.inherits(Ship, MovingObject);
+	
+	module.exports = Ship;
 
 
 /***/ }

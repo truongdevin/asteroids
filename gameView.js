@@ -25,5 +25,10 @@ GameView.prototype.start = function (canvasEl) {
     setInterval(refresh,20);
 };
 
+GameView.prototype.bindKeyHandlers = function () {
+
+
+};
+
 
 module.exports = GameView;

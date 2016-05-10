@@ -1,7 +1,11 @@
 var Asteroid = require("./asteroid.js");
+var Ship = require("./ship");
 
 var Game = function () {
   this.asteroids = [];
+  this.ships = [];
+
+  this.addShip();
   this.addAsteroids();
 }
 
@@ -17,19 +21,38 @@ Game.prototype.addAsteroids = function() {
   }
 };
 
+Game.prototype.addShip = function() {
+  var ship = new Ship({
+    pos: this.randomPosition(),
+    game: this
+  });
+  this.ships.push(ship);
+};
+
+Game.prototype.allObjects = function () {
+  return this.asteroids.concat(this.ships);
+};
+
 Game.prototype.draw = function (ctx) {
   ctx.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
   ctx.fillStyle = Game.BG_COLOR;
   ctx.fillRect(0,0,Game.DIM_X, Game.DIM_Y);
 
-  this.asteroids.forEach(function(asteroid) {
-    asteroid.draw(ctx);
+  // this.asteroids.forEach(function(asteroid) {
+  //   asteroid.draw(ctx);
+  // });
+
+  this.allObjects().forEach(function(object) {
+    object.draw(ctx);
   });
 };
 
 Game.prototype.moveObjects = function () {
-  this.asteroids.forEach(function(asteroid) {
-    asteroid.move();
+  // this.asteroids.forEach(function(asteroid) {
+  //   asteroid.move();
+  // });
+  this.allObjects().forEach(function(object) {
+    object.move();
   });
 
 };
@@ -49,14 +72,27 @@ Game.prototype.wrap = function (pos) {
 
 Game.prototype.checkCollosions = function () {
   var self = this;
-  this.asteroids.forEach(function(asteroid1) {
-    self.asteroids.forEach(function(asteroid2) {
-      if (asteroid1 === asteroid2) {
+  // this.asteroids.forEach(function(asteroid1) {
+  //   self.asteroids.forEach(function(asteroid2) {
+  //     if (asteroid1 === asteroid2) {
+  //       return;
+  //     }
+  //
+  //     if (asteroid1.isCollidedWith(asteroid2)) {
+  //       asteroid1.collideWith(asteroid2);
+  //       console.log("COLLIDED");
+  //     }
+  //   });
+  // });
+  //
+  this.allObjects().forEach(function(object1) {
+    self.allObjects().forEach(function(object2) {
+      if (object1 === object2) {
         return;
       }
 
-      if (asteroid1.isCollidedWith(asteroid2)) {
-        asteroid1.collideWith(asteroid2);
+      if (object1.isCollidedWith(object2)) {
+        object1.collideWith(object2);
         console.log("COLLIDED");
       }
     });
