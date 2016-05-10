@@ -7,19 +7,13 @@ var GameView = function (game, ctx) {
 };
 
 GameView.prototype.start = function (canvasEl) {
-    // var ctx = canvasEl.getContext("2d");
-    // var game = new Game();
 
-    // var refresh = function() {
-    //   game.moveObjects();
-    //   game.draw(ctx);
-    // };
     this.bindKeyHandlers();
     var self = this;
     var refresh = function() {
       // self.game.moveObjects();
-      self.game.step();
       // self.game.checkCollosions();
+      self.game.step();
       self.game.draw(self.ctx);
     };
 
@@ -28,10 +22,10 @@ GameView.prototype.start = function (canvasEl) {
 
 GameView.prototype.bindKeyHandlers = function () {
   var ship = this.ship;
-  key('w', function() {ship.power([0,-1])});
-  key('a', function() {ship.power([-1,0])});
-  key('s', function() {ship.power([0,1])});
-  key('d', function() {ship.power([1,0])});
+  key('w', function() {Math.abs(ship.vel[1]) < 10 ? ship.power([0,-1]) : ""});
+  key('a', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([-1,0]) : ""});
+  key('s', function() {Math.abs(ship.vel[1]) < 10 ? ship.power([0,1]) : ""});
+  key('d', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([1,0]) : ""});
 };
 
 

@@ -39,19 +39,12 @@ Game.prototype.draw = function (ctx) {
   ctx.fillStyle = Game.BG_COLOR;
   ctx.fillRect(0,0,Game.DIM_X, Game.DIM_Y);
 
-  // this.asteroids.forEach(function(asteroid) {
-  //   asteroid.draw(ctx);
-  // });
-
   this.allObjects().forEach(function(object) {
     object.draw(ctx);
   });
 };
 
 Game.prototype.moveObjects = function () {
-  // this.asteroids.forEach(function(asteroid) {
-  //   asteroid.move();
-  // });
   this.allObjects().forEach(function(object) {
     object.move();
   });
@@ -73,19 +66,7 @@ Game.prototype.wrap = function (pos) {
 
 Game.prototype.checkCollosions = function () {
   var self = this;
-  // this.asteroids.forEach(function(asteroid1) {
-  //   self.asteroids.forEach(function(asteroid2) {
-  //     if (asteroid1 === asteroid2) {
-  //       return;
-  //     }
-  //
-  //     if (asteroid1.isCollidedWith(asteroid2)) {
-  //       asteroid1.collideWith(asteroid2);
-  //       console.log("COLLIDED");
-  //     }
-  //   });
-  // });
-  //
+
   this.allObjects().forEach(function(object1) {
     self.allObjects().forEach(function(object2) {
       if (object1 === object2) {

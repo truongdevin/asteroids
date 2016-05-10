@@ -102,19 +102,12 @@
 	  ctx.fillStyle = Game.BG_COLOR;
 	  ctx.fillRect(0,0,Game.DIM_X, Game.DIM_Y);
 	
-	  // this.asteroids.forEach(function(asteroid) {
-	  //   asteroid.draw(ctx);
-	  // });
-	
 	  this.allObjects().forEach(function(object) {
 	    object.draw(ctx);
 	  });
 	};
 	
 	Game.prototype.moveObjects = function () {
-	  // this.asteroids.forEach(function(asteroid) {
-	  //   asteroid.move();
-	  // });
 	  this.allObjects().forEach(function(object) {
 	    object.move();
 	  });
@@ -136,19 +129,7 @@
 	
 	Game.prototype.checkCollosions = function () {
 	  var self = this;
-	  // this.asteroids.forEach(function(asteroid1) {
-	  //   self.asteroids.forEach(function(asteroid2) {
-	  //     if (asteroid1 === asteroid2) {
-	  //       return;
-	  //     }
-	  //
-	  //     if (asteroid1.isCollidedWith(asteroid2)) {
-	  //       asteroid1.collideWith(asteroid2);
-	  //       console.log("COLLIDED");
-	  //     }
-	  //   });
-	  // });
-	  //
+	
 	  this.allObjects().forEach(function(object1) {
 	    self.allObjects().forEach(function(object2) {
 	      if (object1 === object2) {
@@ -273,19 +254,13 @@
 	};
 	
 	GameView.prototype.start = function (canvasEl) {
-	    // var ctx = canvasEl.getContext("2d");
-	    // var game = new Game();
 	
-	    // var refresh = function() {
-	    //   game.moveObjects();
-	    //   game.draw(ctx);
-	    // };
 	    this.bindKeyHandlers();
 	    var self = this;
 	    var refresh = function() {
 	      // self.game.moveObjects();
-	      self.game.step();
 	      // self.game.checkCollosions();
+	      self.game.step();
 	      self.game.draw(self.ctx);
 	    };
 	
@@ -294,10 +269,10 @@
 	
 	GameView.prototype.bindKeyHandlers = function () {
 	  var ship = this.ship;
-	  key('w', function() {ship.power([0,-1])});
-	  key('a', function() {ship.power([-1,0])});
-	  key('s', function() {ship.power([0,1])});
-	  key('d', function() {ship.power([1,0])});
+	  key('w', function() {Math.abs(ship.vel[1]) < 10 ? ship.power([0,-1]) : ""});
+	  key('a', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([-1,0]) : ""});
+	  key('s', function() {Math.abs(ship.vel[1]) < 10 ? ship.power([0,1]) : ""});
+	  key('d', function() {Math.abs(ship.vel[0]) < 10 ? ship.power([1,0]) : ""});
 	};
 	
 	
